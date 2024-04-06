@@ -100,17 +100,21 @@
 			return -400 * Math.log(1 / score - 1) / Math.LN10;
 		}
 		
-		function score_to_nelo(score, std_deviation) {
-			return (score - 0.5) / (Math.sqrt(2) * std_deviation) * (800 / Math.LN10)
+		function score_to_nelo_penta(score, std_deviation) {
+			return (score - 0.5) / (Math.sqrt(2) * std_deviation) * (800 / Math.LN10);
+		}
+		
+		function score_to_nelo_wdl(score, std_deviation) {
+			return (score - 0.5) / (std_deviation) * (800 / Math.LN10);
 		}
 		
 		function ncdf(x, mean, std) {
-			var x = (x - mean) / std
-			var t = 1 / (1 + 0.2315419 * Math.abs(x))
-			var d = 0.3989423 * Math.exp( -x * x / 2)
-			var prob = d * t * (0.3193815 + t * ( -0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))))
-			if( x > 0 ) {prob = 1 - prob}
-			return prob
+			var x = (x - mean) / std;
+			var t = 1 / (1 + 0.2315419 * Math.abs(x));
+			var d = 0.3989423 * Math.exp( -x * x / 2);
+			var prob = d * t * (0.3193815 + t * ( -0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+			if( x > 0 ) {prob = 1 - prob};
+			return prob;
 		}
 
         function calculateWDLElo() {
@@ -118,15 +122,16 @@
             var draws = parseFloat(document.getElementById("draws").value);
             var wins = parseFloat(document.getElementById("wins").value);
 			var total_games = losses + draws + wins;
-			var score = (losses * 0 + draws * 0.5 + wins * 1) / total_games;
+			var points = losses * 0 + draws * 0.5 + wins * 1;
+			var score = points / total_games;
 			
-			var losses_score = losses / total_games;
-			var draws_score = draws / total_games;
-			var wins_score = wins / total_games;
+			var losses_ratio = losses / total_games;
+			var draws_ratio = draws / total_games;
+			var wins_ratio = wins / total_games;
 			
-			var losses_dev = losses_score * Math.pow(0 - score, 2);
-			var draws_dev = draws_score * Math.pow(0.5 - score, 2);
-			var wins_dev = wins_score * Math.pow(1 - score, 2);
+			var losses_dev = losses_ratio * Math.pow(0 - score, 2);
+			var draws_dev = draws_ratio * Math.pow(0.5 - score, 2);
+			var wins_dev = wins_ratio * Math.pow(1 - score, 2);
 			var variance = losses_dev + draws_dev + wins_dev;
 			var std_deviation = Math.sqrt(variance);
 			
@@ -139,18 +144,20 @@
 			var elo_upper_bound = score_to_elo(score_upper_bound);
 			var elo_error_margin = (elo_upper_bound - elo_lower_bound) / 2;
 			
-			var nelo = score_to_nelo(score, std_deviation);
-			var nelo_lower_bound = score_to_nelo(score_lower_bound, std_deviation);
-			var nelo_upper_bound = score_to_nelo(score_upper_bound, std_deviation);
+			var nelo = score_to_nelo_wdl(score, std_deviation);
+			var nelo_lower_bound = score_to_nelo_wdl(score_lower_bound, std_deviation);
+			var nelo_upper_bound = score_to_nelo_wdl(score_upper_bound, std_deviation);
 			var nelo_error_margin = (nelo_upper_bound - nelo_lower_bound) / 2;
 			
 			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_games))))*100;
 			
-            document.getElementById("WDLElo").innerHTML = "Elo: " + elo.toFixed(2) + " +/- " + elo_error_margin.toFixed(2) 
+			var win_loss_ratio = wins / losses;
+			
+            document.getElementById("WDLElo").innerHTML = "Points: " + points + "/" + total_games + "<br>Elo: " + elo.toFixed(2) + " +/- " + elo_error_margin.toFixed(2) 
 			+ " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
 			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" 
 			+ nelo_lower_bound.toFixed(2) + ", " + nelo_upper_bound.toFixed(2) + "]"
-			+ "<br>LOS: " + LOS.toFixed(2) + "%";
+			+ "<br>LOS: " + LOS.toFixed(2) + "%" + "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) + "<br>Draw Ratio: " + draws_ratio.toFixed(2);
         }
 
         function calculatePentanomialElo() {
@@ -160,19 +167,20 @@
             var WD = parseFloat(document.getElementById("WD").value);
             var WW = parseFloat(document.getElementById("WW").value);
 			var total_pairs = LL + LD + DD + WD + WW;
-			var score = (LL * 0 + LD * 0.25 + DD * 0.5 + WD * 0.75 + WW * 1) / total_pairs;
+			var points = LL * 0 + LD * 0.25 + DD * 0.5 + WD * 0.75 + WW * 1;
+			var score = points / total_pairs;
 			
-			var LL_score = LL / total_pairs;
-			var LD_score = LD / total_pairs;
-			var DD_score = DD / total_pairs;
-			var WD_score = WD / total_pairs;
-			var WW_score = WW / total_pairs;
+			var LL_ratio = LL / total_pairs;
+			var LD_ratio = LD / total_pairs;
+			var DD_ratio = DD / total_pairs;
+			var WD_ratio = WD / total_pairs;
+			var WW_ratio = WW / total_pairs;
 			
-			var LL_dev = LL_score * Math.pow(0 - score, 2);
-			var LD_dev = LD_score * Math.pow(0.25 - score, 2);
-			var DD_dev = DD_score * Math.pow(0.5 - score, 2);
-			var WD_dev = WD_score * Math.pow(0.75 - score, 2);
-			var WW_dev = WW_score * Math.pow(1 - score, 2);
+			var LL_dev = LL_ratio * Math.pow(0 - score, 2);
+			var LD_dev = LD_ratio * Math.pow(0.25 - score, 2);
+			var DD_dev = DD_ratio * Math.pow(0.5 - score, 2);
+			var WD_dev = WD_ratio * Math.pow(0.75 - score, 2);
+			var WW_dev = WW_ratio * Math.pow(1 - score, 2);
 			var variance = LL_dev + LD_dev + DD_dev + WD_dev + WW_dev;
 			var std_deviation = Math.sqrt(variance);
 			
@@ -185,9 +193,9 @@
 			var elo_upper_bound = score_to_elo(score_upper_bound);
 			var elo_error_margin = (elo_upper_bound - elo_lower_bound) / 2;
 			
-			var nelo = score_to_nelo(score, std_deviation);
-			var nelo_lower_bound = score_to_nelo(score_lower_bound, std_deviation);
-			var nelo_upper_bound = score_to_nelo(score_upper_bound, std_deviation);
+			var nelo = score_to_nelo_penta(score, std_deviation);
+			var nelo_lower_bound = score_to_nelo_penta(score_lower_bound, std_deviation);
+			var nelo_upper_bound = score_to_nelo_penta(score_upper_bound, std_deviation);
 			var nelo_error_margin = (nelo_upper_bound - nelo_lower_bound) / 2;
 			
 			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_pairs))))*100;
@@ -214,13 +222,13 @@
 			var gamepairs_elo_upper_bound = score_to_elo(gamepairs_score_upper_bound);
 			var gamepairs_elo_error_margin = (gamepairs_elo_upper_bound - gamepairs_elo_lower_bound) / 2;
 
-            document.getElementById("PentanomialElo").innerHTML = "Elo: " + elo.toFixed(2) + " +/- " 
+            document.getElementById("PentanomialElo").innerHTML = "Points: " + (points * 2) + "/" + (total_pairs * 2) + "<br>Elo: " + elo.toFixed(2) + " +/- " 
 			+ elo_error_margin.toFixed(2) + " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
 			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" + nelo_lower_bound.toFixed(2) + ", " 
 			+ nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%" 
 			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " +/- " + gamepairs_elo_error_margin.toFixed(2) 
 			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + ", " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2);
+			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + DD_ratio.toFixed(2);
         }
     </script>
 </body>
