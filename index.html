@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elo Difference Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-group, .button-group {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-group h3, .button-group button {
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            margin: 5px;
+            padding: 5px;
+            width: 60px;
+        }
+        .button-group button {
+            padding: 8px 15px;
+        }
+        #sum, #product {
+            margin-top: 20px;
+        }
+		/* For mobile devices */
+@media only screen and (max-width: 600px) {
+    .input-group input {
+        width: 10%; /* Set input width to 90% of container width */
+        max-width: 200px; /* Set max-width to prevent input from expanding too much */
+    }
+        footer {
+            position: relative;
+            bottom: 10px;
+            width: 100%;
+        }
+	}
+    </style>
+</head>
+<body>
+    <h1>Elo Difference Calculator</h1>
+    <div class="container">
+        <div class="input-group">
+            <h3>Win-Draw-Loss Model</h3>
+            <div>
+				<label for="losses">Losses:</label>
+				<input id="losses" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="draws">Draws:</label>
+				<input id="draws" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="wins">Wins:</label>
+                <input id="wins" type="number" min="0" oninput="validity.valid||(value='');">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="calculateWDLElo()">Calculate Elo</button>
+            <div id="WDLElo"></div>
+        </div>
+
+        <div class="input-group">
+            <h3>Pentanomial Model</h3>
+            <div>
+				<label for="LL">LL:</label>
+				<input id="LL" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="LD">LD:</label>
+				<input id="LD" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="DD">DD/WL:</label>
+				<input id="DD" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="WD">WD:</label>
+				<input id="WD" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="WW">WW:</label>
+				<input id="WW" type="number" min="0" oninput="validity.valid||(value='');">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="calculatePentanomialElo()">Calculate Elo</button>
+            <div id="PentanomialElo"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p><br><br>This page is used to calculate the elo difference between two chess engines/players based on match results. Error margins are in 95% confidence interval.<br>Written by justanothertester from Stockfish Discord.</p>
+    </footer>
+
+    <script>
+		function score_to_elo(score) {
+			return -400 * Math.log(1 / score - 1) / Math.LN10;
+		}
+		
+		function score_to_nelo(score, std_deviation) {
+			return (score - 0.5) / (Math.sqrt(2) * std_deviation) * (800 / Math.LN10)
+		}
+		
+		function ncdf(x, mean, std) {
+			var x = (x - mean) / std
+			var t = 1 / (1 + 0.2315419 * Math.abs(x))
+			var d = 0.3989423 * Math.exp( -x * x / 2)
+			var prob = d * t * (0.3193815 + t * ( -0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))))
+			if( x > 0 ) {prob = 1 - prob}
+			return prob
+		}
+
+        function calculateWDLElo() {
+            var losses = parseFloat(document.getElementById("losses").value);
+            var draws = parseFloat(document.getElementById("draws").value);
+            var wins = parseFloat(document.getElementById("wins").value);
+			var total_games = losses + draws + wins;
+			var score = (losses * 0 + draws * 0.5 + wins * 1) / total_games;
+			
+			var losses_score = losses / total_games;
+			var draws_score = draws / total_games;
+			var wins_score = wins / total_games;
+			
+			var losses_dev = losses_score * Math.pow(0 - score, 2);
+			var draws_dev = draws_score * Math.pow(0.5 - score, 2);
+			var wins_dev = wins_score * Math.pow(1 - score, 2);
+			var variance = losses_dev + draws_dev + wins_dev;
+			var std_deviation = Math.sqrt(variance);
+			
+			var score_lower_bound = score - 1.959963984540054 * std_deviation / Math.sqrt(total_games);
+			var score_upper_bound = score + 1.959963984540054 * std_deviation / Math.sqrt(total_games);
+			var score_error_margin = (score_upper_bound - score_lower_bound) / 2;
+			
+			var elo = score_to_elo(score);
+			var elo_lower_bound = score_to_elo(score_lower_bound);
+			var elo_upper_bound = score_to_elo(score_upper_bound);
+			var elo_error_margin = (elo_upper_bound - elo_lower_bound) / 2;
+			
+			var nelo = score_to_nelo(score, std_deviation);
+			var nelo_lower_bound = score_to_nelo(score_lower_bound, std_deviation);
+			var nelo_upper_bound = score_to_nelo(score_upper_bound, std_deviation);
+			var nelo_error_margin = (nelo_upper_bound - nelo_lower_bound) / 2;
+			
+			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_games))))*100;
+			
+            document.getElementById("WDLElo").innerHTML = "Elo: " + elo.toFixed(2) + " +/- " + elo_error_margin.toFixed(2) 
+			+ " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
+			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" 
+			+ nelo_lower_bound.toFixed(2) + ", " + nelo_upper_bound.toFixed(2) + "]"
+			+ "<br>LOS: " + LOS.toFixed(2) + "%";
+        }
+
+        function calculatePentanomialElo() {
+            var LL = parseFloat(document.getElementById("LL").value);
+            var LD = parseFloat(document.getElementById("LD").value);
+            var DD = parseFloat(document.getElementById("DD").value);
+            var WD = parseFloat(document.getElementById("WD").value);
+            var WW = parseFloat(document.getElementById("WW").value);
+			var total_pairs = LL + LD + DD + WD + WW;
+			var score = (LL * 0 + LD * 0.25 + DD * 0.5 + WD * 0.75 + WW * 1) / total_pairs;
+			
+			var LL_score = LL / total_pairs;
+			var LD_score = LD / total_pairs;
+			var DD_score = DD / total_pairs;
+			var WD_score = WD / total_pairs;
+			var WW_score = WW / total_pairs;
+			
+			var LL_dev = LL_score * Math.pow(0 - score, 2);
+			var LD_dev = LD_score * Math.pow(0.25 - score, 2);
+			var DD_dev = DD_score * Math.pow(0.5 - score, 2);
+			var WD_dev = WD_score * Math.pow(0.75 - score, 2);
+			var WW_dev = WW_score * Math.pow(1 - score, 2);
+			var variance = LL_dev + LD_dev + DD_dev + WD_dev + WW_dev;
+			var std_deviation = Math.sqrt(variance);
+			
+			var score_lower_bound = score - 1.959963984540054 * std_deviation / Math.sqrt(total_pairs);
+			var score_upper_bound = score + 1.959963984540054 * std_deviation / Math.sqrt(total_pairs);
+			var score_error_margin = (score_upper_bound - score_lower_bound) / 2;
+			
+			var elo = score_to_elo(score);
+			var elo_lower_bound = score_to_elo(score_lower_bound);
+			var elo_upper_bound = score_to_elo(score_upper_bound);
+			var elo_error_margin = (elo_upper_bound - elo_lower_bound) / 2;
+			
+			var nelo = score_to_nelo(score, std_deviation);
+			var nelo_lower_bound = score_to_nelo(score_lower_bound, std_deviation);
+			var nelo_upper_bound = score_to_nelo(score_upper_bound, std_deviation);
+			var nelo_error_margin = (nelo_upper_bound - nelo_lower_bound) / 2;
+			
+			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_pairs))))*100;
+			
+			var pairs_ratio = (WW + WD) / (LL + LD);
+			
+			var gamepairs_L_score = (LL + LD) / total_pairs;
+			var gamepairs_D_score = (DD) / total_pairs;
+			var gamepairs_W_score = (WW + WD) / total_pairs;
+			var gamepairs_score = ((LL + LD) * 0 + DD * 0.5 + (WD + WW) * 1) / total_pairs;
+			
+			var gamepairs_L_dev = gamepairs_L_score * Math.pow(0 - gamepairs_score, 2);
+			var gamepairs_D_dev = gamepairs_D_score * Math.pow(0.5 - gamepairs_score, 2);
+			var gamepairs_W_dev = gamepairs_W_score * Math.pow(1 - gamepairs_score, 2);
+			var gamepairs_variance = gamepairs_L_dev + gamepairs_D_dev + gamepairs_W_dev;
+			var gamepairs_std_deviation = Math.sqrt(gamepairs_variance);
+			
+			var gamepairs_score_lower_bound = gamepairs_score - 1.959963984540054 * gamepairs_std_deviation / Math.sqrt(total_pairs);
+			var gamepairs_score_upper_bound = gamepairs_score + 1.959963984540054 * gamepairs_std_deviation / Math.sqrt(total_pairs);
+			var gamepairs_score_error_margin = (gamepairs_score_upper_bound - gamepairs_score_lower_bound) / 2;
+			
+			var gamepairs_elo = score_to_elo(gamepairs_score);
+			var gamepairs_elo_lower_bound = score_to_elo(gamepairs_score_lower_bound);
+			var gamepairs_elo_upper_bound = score_to_elo(gamepairs_score_upper_bound);
+			var gamepairs_elo_error_margin = (gamepairs_elo_upper_bound - gamepairs_elo_lower_bound) / 2;
+
+            document.getElementById("PentanomialElo").innerHTML = "Elo: " + elo.toFixed(2) + " +/- " 
+			+ elo_error_margin.toFixed(2) + " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
+			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" + nelo_lower_bound.toFixed(2) + ", " 
+			+ nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%" 
+			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " +/- " + gamepairs_elo_error_margin.toFixed(2) 
+			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + ", " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
+			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2);
+        }
+    </script>
+</body>
+</html>
