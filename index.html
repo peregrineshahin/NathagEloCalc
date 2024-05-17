@@ -76,8 +76,8 @@
 				<input id="LL" type="number" min="0" oninput="validity.valid||(value='');">
 				<label for="LD">LD:</label>
 				<input id="LD" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="DD">DD/WL:</label>
-				<input id="DD" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="WLDD">DD/WL:</label>
+				<input id="WLDD" type="number" min="0" oninput="validity.valid||(value='');">
 				<label for="WD">WD:</label>
 				<input id="WD" type="number" min="0" oninput="validity.valid||(value='');">
 				<label for="WW">WW:</label>
@@ -163,25 +163,25 @@
         function calculatePentanomialElo() {
             var LL = parseFloat(document.getElementById("LL").value);
             var LD = parseFloat(document.getElementById("LD").value);
-            var DD = parseFloat(document.getElementById("DD").value);
+            var WLDD = parseFloat(document.getElementById("WLDD").value);
             var WD = parseFloat(document.getElementById("WD").value);
             var WW = parseFloat(document.getElementById("WW").value);
-			var total_pairs = LL + LD + DD + WD + WW;
-			var points = LL * 0 + LD * 0.25 + DD * 0.5 + WD * 0.75 + WW * 1;
+			var total_pairs = LL + LD + WLDD + WD + WW;
+			var points = LL * 0 + LD * 0.25 + WLDD * 0.5 + WD * 0.75 + WW * 1;
 			var score = points / total_pairs;
 			
 			var LL_ratio = LL / total_pairs;
 			var LD_ratio = LD / total_pairs;
-			var DD_ratio = DD / total_pairs;
+			var WLDD_ratio = WLDD / total_pairs;
 			var WD_ratio = WD / total_pairs;
 			var WW_ratio = WW / total_pairs;
 			
 			var LL_dev = LL_ratio * Math.pow(0 - score, 2);
 			var LD_dev = LD_ratio * Math.pow(0.25 - score, 2);
-			var DD_dev = DD_ratio * Math.pow(0.5 - score, 2);
+			var WLDD_dev = WLDD_ratio * Math.pow(0.5 - score, 2);
 			var WD_dev = WD_ratio * Math.pow(0.75 - score, 2);
 			var WW_dev = WW_ratio * Math.pow(1 - score, 2);
-			var variance = LL_dev + LD_dev + DD_dev + WD_dev + WW_dev;
+			var variance = LL_dev + LD_dev + WLDD_dev + WD_dev + WW_dev;
 			var std_deviation = Math.sqrt(variance);
 			
 			var score_lower_bound = score - 1.959963984540054 * std_deviation / Math.sqrt(total_pairs);
@@ -203,9 +203,9 @@
 			var pairs_ratio = (WW + WD) / (LL + LD);
 			
 			var gamepairs_L_score = (LL + LD) / total_pairs;
-			var gamepairs_D_score = (DD) / total_pairs;
+			var gamepairs_D_score = (WLDD) / total_pairs;
 			var gamepairs_W_score = (WW + WD) / total_pairs;
-			var gamepairs_score = ((LL + LD) * 0 + DD * 0.5 + (WD + WW) * 1) / total_pairs;
+			var gamepairs_score = ((LL + LD) * 0 + WLDD * 0.5 + (WD + WW) * 1) / total_pairs;
 			
 			var gamepairs_L_dev = gamepairs_L_score * Math.pow(0 - gamepairs_score, 2);
 			var gamepairs_D_dev = gamepairs_D_score * Math.pow(0.5 - gamepairs_score, 2);
@@ -228,7 +228,7 @@
 			+ nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%" 
 			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " +/- " + gamepairs_elo_error_margin.toFixed(2) 
 			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + ", " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + DD_ratio.toFixed(2);
+			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2);
         }
     </script>
 </body>
