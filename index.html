@@ -82,6 +82,10 @@
 				<input id="WD" type="number" min="0" oninput="validity.valid||(value='');">
 				<label for="WW">WW:</label>
 				<input id="WW" type="number" min="0" oninput="validity.valid||(value='');">
+				<label for="elo0">elo0:</label>
+				<input id="elo0" type="number" min="0" oninput="validity.valid||(value='');" value="0">
+				<label for="elo1">elo1:</label>
+				<input id="elo1" type="number" min="0" oninput="validity.valid||(value='');" value="0">
             </div>
         </div>
 
@@ -106,6 +110,14 @@
 		
 		function score_to_nelo_wdl(score, std_deviation) {
 			return (score - 0.5) / (std_deviation) * (800 / Math.LN10);
+		}
+		
+		function nelo_to_score_penta(nelo, std_deviation) {
+			return nelo * Math.sqrt(2) * std_deviation / (800 / Math.LN10) + 0.5;
+		}
+		
+		function nelo_to_score_wdl(nelo, std_deviation) {
+			return nelo * std_deviation / (800 / Math.LN10) + 0.5;
 		}
 		
 		function ncdf(x, mean, std) {
@@ -221,6 +233,12 @@
 			var gamepairs_elo_lower_bound = score_to_elo(gamepairs_score_lower_bound);
 			var gamepairs_elo_upper_bound = score_to_elo(gamepairs_score_upper_bound);
 			var gamepairs_elo_error_margin = (gamepairs_elo_upper_bound - gamepairs_elo_lower_bound) / 2;
+			
+			var nelo0 = parseFloat(document.getElementById("elo0").value)
+			var nelo1 = parseFloat(document.getElementById("elo1").value)
+			var score0 = nelo_to_score_penta(nelo0, std_deviation)
+			var score1 = nelo_to_score_penta(nelo1, std_deviation)
+			var llr = (score1 - score0) * (2 * score - score0 - score1) / (2 * (variance / total_pairs))
 
             document.getElementById("PentanomialElo").innerHTML = "Points: " + (points * 2) + "/" + (total_pairs * 2) + "<br>Elo: " + elo.toFixed(2) + " +/- " 
 			+ elo_error_margin.toFixed(2) + " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
@@ -228,7 +246,7 @@
 			+ nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%" 
 			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " +/- " + gamepairs_elo_error_margin.toFixed(2) 
 			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + ", " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2);
+			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) + "<br>LLR: " + llr.toFixed(2);
         }
     </script>
 </body>
