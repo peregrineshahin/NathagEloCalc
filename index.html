@@ -193,7 +193,7 @@
 			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" 
 			+ nelo_lower_bound.toFixed(2) + ", " + nelo_upper_bound.toFixed(2) + "]"
 			+ "<br>LOS: " + LOS.toFixed(2) + "%" + "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) + "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + LLR.toFixed(2);
+			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + LLR.toFixed(4);
         }
 
         function calculatePentanomialElo() {
@@ -271,7 +271,7 @@
 			+ nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%" 
 			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " +/- " + gamepairs_elo_error_margin.toFixed(2) 
 			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + ", " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) + "<br>LLR: " + llr.toFixed(2);
+			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
         }
     </script>
 </body>
