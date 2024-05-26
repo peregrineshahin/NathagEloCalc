@@ -73,6 +73,17 @@
                     <option value="Elo">Elo</option>
                     <option value="BayesElo">BayesElo</option>
                 </select>
+				<label for="errormarginWDL">Margin:</label>
+				<select id="errormarginWDL">
+                    <option value="CI95">95% CI</option>
+					<option value="CI80">80% CI</option>
+                    <option value="CI85">85% CI</option>
+                    <option value="CI90">90% CI</option>
+                    <option value="CI99">99% CI</option>
+					<option value="sigma1">1-sigma</option>
+                    <option value="sigma2">2-sigma</option>
+                    <option value="sigma3">3-sigma</option>
+                </select>
             </div>
         </div>
 
@@ -104,6 +115,17 @@
                     <option value="nElo">nElo</option>
                     <option value="Elo">Elo</option>
                 </select>
+				<label for="errormarginPenta">Margin:</label>
+				<select id="errormarginPenta">
+                    <option value="CI95">95% CI</option>
+					<option value="CI80">80% CI</option>
+                    <option value="CI85">85% CI</option>
+                    <option value="CI90">90% CI</option>
+                    <option value="CI99">99% CI</option>
+					<option value="sigma1">1-sigma</option>
+                    <option value="sigma2">2-sigma</option>
+                    <option value="sigma3">3-sigma</option>
+                </select>
             </div>
         </div>
 
@@ -114,7 +136,7 @@
     </div>
 
     <footer>
-        <p><br><br>This page is used to calculate the elo difference between two chess engines/players based on match results. Error margins are in 95% confidence interval.<br>Written by justanothertester from Stockfish Discord.</p>
+        <p><br><br>This page is used to calculate the elo difference and other match stats between two chess engines/players based on match results.<br>Written by justanothertester from Stockfish Discord.</p>
     </footer>
 
     <script>
@@ -177,8 +199,18 @@
 			var variance = losses_dev + draws_dev + wins_dev;
 			var std_deviation = Math.sqrt(variance);
 			
-			var score_lower_bound = score - 1.959963984540054 * std_deviation / Math.sqrt(total_games);
-			var score_upper_bound = score + 1.959963984540054 * std_deviation / Math.sqrt(total_games);
+			var zscore;
+			var errormargin = document.getElementById("errormarginWDL").value;
+			if (errormargin == "CI95") {zscore = 1.959963984540054}
+			else if (errormargin == "CI80") {zscore = 1.2815515655446004}
+			else if (errormargin == "CI85") {zscore = 1.4395314709384557}
+			else if (errormargin == "CI90") {zscore = 1.6448536269514729}
+			else if (errormargin == "CI99") {zscore = 2.5758293035489004}
+			else if (errormargin == "sigma1") {zscore = 1}
+			else if (errormargin == "sigma2") {zscore = 2}
+			else if (errormargin == "sigma3") {zscore = 3}
+			var score_lower_bound = score - zscore * std_deviation / Math.sqrt(total_games);
+			var score_upper_bound = score + zscore * std_deviation / Math.sqrt(total_games);
 			var score_error_margin = (score_upper_bound - score_lower_bound) / 2;
 			
 			var elo = score_to_elo(score);
@@ -258,8 +290,18 @@
 			var variance = LL_dev + LD_dev + WLDD_dev + WD_dev + WW_dev;
 			var std_deviation = Math.sqrt(variance);
 			
-			var score_lower_bound = score - 1.959963984540054 * std_deviation / Math.sqrt(total_pairs);
-			var score_upper_bound = score + 1.959963984540054 * std_deviation / Math.sqrt(total_pairs);
+			var zscore;
+			var errormargin = document.getElementById("errormarginPenta").value;
+			if (errormargin == "CI95") {zscore = 1.959963984540054}
+			else if (errormargin == "CI80") {zscore = 1.2815515655446004}
+			else if (errormargin == "CI85") {zscore = 1.4395314709384557}
+			else if (errormargin == "CI90") {zscore = 1.6448536269514729}
+			else if (errormargin == "CI99") {zscore = 2.5758293035489004}
+			else if (errormargin == "sigma1") {zscore = 1}
+			else if (errormargin == "sigma2") {zscore = 2}
+			else if (errormargin == "sigma3") {zscore = 3}
+			var score_lower_bound = score - zscore * std_deviation / Math.sqrt(total_pairs);
+			var score_upper_bound = score + zscore * std_deviation / Math.sqrt(total_pairs);
 			var score_error_margin = (score_upper_bound - score_lower_bound) / 2;
 			
 			var elo = score_to_elo(score);
@@ -287,8 +329,8 @@
 			var gamepairs_variance = gamepairs_L_dev + gamepairs_D_dev + gamepairs_W_dev;
 			var gamepairs_std_deviation = Math.sqrt(gamepairs_variance);
 			
-			var gamepairs_score_lower_bound = gamepairs_score - 1.959963984540054 * gamepairs_std_deviation / Math.sqrt(total_pairs);
-			var gamepairs_score_upper_bound = gamepairs_score + 1.959963984540054 * gamepairs_std_deviation / Math.sqrt(total_pairs);
+			var gamepairs_score_lower_bound = gamepairs_score - zscore * gamepairs_std_deviation / Math.sqrt(total_pairs);
+			var gamepairs_score_upper_bound = gamepairs_score + zscore * gamepairs_std_deviation / Math.sqrt(total_pairs);
 			var gamepairs_score_error_margin = (gamepairs_score_upper_bound - gamepairs_score_lower_bound) / 2;
 			
 			var gamepairs_elo = score_to_elo(gamepairs_score);
