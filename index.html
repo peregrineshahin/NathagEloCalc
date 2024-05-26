@@ -221,12 +221,14 @@
 			var elo = score_to_elo(score);
 			var elo_lower_bound = score_to_elo(score_lower_bound);
 			var elo_upper_bound = score_to_elo(score_upper_bound);
-			var elo_error_margin = (elo_upper_bound - elo_lower_bound) / 2;
+			var elo_error_margin_lower = elo_lower_bound - elo;
+			var elo_error_margin_upper = elo_upper_bound - elo;
 			
 			var nelo = score_to_nelo_wdl(score, std_deviation);
 			var nelo_lower_bound = score_to_nelo_wdl(score_lower_bound, std_deviation);
 			var nelo_upper_bound = score_to_nelo_wdl(score_upper_bound, std_deviation);
-			var nelo_error_margin = (nelo_upper_bound - nelo_lower_bound) / 2;
+			var nelo_error_margin_lower = nelo_lower_bound - nelo;
+			var nelo_error_margin_upper = nelo_upper_bound - nelo;
 			
 			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_games))))*100;
 			
@@ -236,6 +238,8 @@
 			var bayeselo = score_to_bayeselo(score, drawelo)
 			var bayeselo_lower_bound = score_to_bayeselo(score_lower_bound, drawelo);
 			var bayeselo_upper_bound = score_to_bayeselo(score_upper_bound, drawelo);
+			var bayeselo_error_margin_lower = bayeselo_lower_bound - bayeselo;
+			var bayeselo_error_margin_upper = bayeselo_upper_bound - bayeselo;
 			
 			var elo0 = parseFloat(document.getElementById("elo0wdl").value)
 			var elo1 = parseFloat(document.getElementById("elo1wdl").value)
@@ -264,13 +268,13 @@
 			var llr = 0.5 * total_games * Math.log(variance0 / variance1)
 			
             document.getElementById("WDLElo").innerHTML = "Points: " + points + "/" + total_games + " (" + score_in_percent.toFixed(2) + "%)"
-			+ "<br>Elo: " + elo.toFixed(2) + " +/- " + elo_error_margin.toFixed(2) 
-			+ " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
-			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" 
-			+ nelo_lower_bound.toFixed(2) + ", " + nelo_upper_bound.toFixed(2) + "]"
+			+ "<br>Elo: " + elo.toFixed(2) + " (" + elo_error_margin_lower.toFixed(2) + " / +" + elo_error_margin_upper.toFixed(2) + ")"
+			+ " [" + elo_lower_bound.toFixed(2) + " to " + elo_upper_bound.toFixed(2) + "]"
+			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " (" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")" 
+			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]"
 			+ "<br>LOS: " + LOS.toFixed(2) + "%" + "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) + "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>Bayes Elo: " + bayeselo.toFixed(2)
-			+ " [" + bayeselo_lower_bound.toFixed(2) + ", " + bayeselo_upper_bound.toFixed(2) + "]"
+			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + " (" + bayeselo_error_margin_lower.toFixed(2) + " / +" + bayeselo_error_margin_upper.toFixed(2) + ")"
+			+ " [" + bayeselo_lower_bound.toFixed(2) + " to " + bayeselo_upper_bound.toFixed(2) + "]"
 			+ "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
         }
 
@@ -316,12 +320,14 @@
 			var elo = score_to_elo(score);
 			var elo_lower_bound = score_to_elo(score_lower_bound);
 			var elo_upper_bound = score_to_elo(score_upper_bound);
-			var elo_error_margin = (elo_upper_bound - elo_lower_bound) / 2;
+			var elo_error_margin_lower = elo_lower_bound - elo;
+			var elo_error_margin_upper = elo_upper_bound - elo;
 			
 			var nelo = score_to_nelo_penta(score, std_deviation);
 			var nelo_lower_bound = score_to_nelo_penta(score_lower_bound, std_deviation);
 			var nelo_upper_bound = score_to_nelo_penta(score_upper_bound, std_deviation);
-			var nelo_error_margin = (nelo_upper_bound - nelo_lower_bound) / 2;
+			var nelo_error_margin_lower = nelo_lower_bound - nelo;
+			var nelo_error_margin_upper = nelo_upper_bound - nelo;
 			
 			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_pairs))))*100;
 			
@@ -345,7 +351,8 @@
 			var gamepairs_elo = score_to_elo(gamepairs_score);
 			var gamepairs_elo_lower_bound = score_to_elo(gamepairs_score_lower_bound);
 			var gamepairs_elo_upper_bound = score_to_elo(gamepairs_score_upper_bound);
-			var gamepairs_elo_error_margin = (gamepairs_elo_upper_bound - gamepairs_elo_lower_bound) / 2;
+			var gamepairs_elo_error_margin_lower = gamepairs_elo_lower_bound - gamepairs_elo;
+			var gamepairs_elo_error_margin_upper = gamepairs_elo_upper_bound - gamepairs_elo;
 			
 			var elo0 = parseFloat(document.getElementById("elo0penta").value)
 			var elo1 = parseFloat(document.getElementById("elo1penta").value)
@@ -375,11 +382,12 @@
 			var llr = 0.5 * total_pairs * Math.log(variance0 / variance1)
 
             document.getElementById("PentanomialElo").innerHTML = "Points: " + (points * 2) + "/" + (total_pairs * 2) + " (" + score_in_percent.toFixed(2) + "%)" 
-			+ "<br>Elo: " + elo.toFixed(2) + " +/- " + elo_error_margin.toFixed(2) + " [" + elo_lower_bound.toFixed(2) + ", " + elo_upper_bound.toFixed(2) + "]"
-			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" + nelo_lower_bound.toFixed(2) + ", " 
-			+ nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%" 
-			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " +/- " + gamepairs_elo_error_margin.toFixed(2) 
-			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + ", " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
+			+ "<br>Elo: " + elo.toFixed(2) + " (" + elo_error_margin_lower.toFixed(2) + " / +" + elo_error_margin_upper.toFixed(2) + ")"
+			+ " [" + elo_lower_bound.toFixed(2) + " to " + elo_upper_bound.toFixed(2) + "]"
+			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " (" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")"
+			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%"
+			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " (" + gamepairs_elo_error_margin_lower.toFixed(2) + " / +" + gamepairs_elo_error_margin_upper.toFixed(2) + ")"
+			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + " to " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
 			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
         }
     </script>
