@@ -267,15 +267,19 @@
 			var variance1 = losses_dev1 + draws_dev1 + wins_dev1;
 			var llr = 0.5 * total_games * Math.log(variance0 / variance1)
 			
-            document.getElementById("WDLElo").innerHTML = "Points: " + points + "/" + total_games + " (" + score_in_percent.toFixed(2) + "%)"
+            document.getElementById("WDLElo").innerHTML = 
+			"Points: " + points + "/" + total_games + " (" + score_in_percent.toFixed(2) + "%)"
 			+ "<br>Elo: " + elo.toFixed(2) + " (" + elo_error_margin_lower.toFixed(2) + " / +" + elo_error_margin_upper.toFixed(2) + ")"
 			+ " [" + elo_lower_bound.toFixed(2) + " to " + elo_upper_bound.toFixed(2) + "]"
-			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " (" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")" 
+			+ "<br>nElo: " + nelo.toFixed(2) + " (" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")" 
 			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]"
-			+ "<br>LOS: " + LOS.toFixed(2) + "%" + "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) + "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + " (" + bayeselo_error_margin_lower.toFixed(2) + " / +" + bayeselo_error_margin_upper.toFixed(2) + ")"
+			+ "<br>BayesElo: " + bayeselo.toFixed(2) + " (" + bayeselo_error_margin_lower.toFixed(2) + " / +" + bayeselo_error_margin_upper.toFixed(2) + ")"
 			+ " [" + bayeselo_lower_bound.toFixed(2) + " to " + bayeselo_upper_bound.toFixed(2) + "]"
-			+ "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
+			+ "<br>DrawElo: " + drawelo.toFixed(2) 
+			+ "<br>LOS: " + LOS.toFixed(2) + "%" 
+			+ "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) 
+			+ "<br>Draw Ratio: " + draws_ratio.toFixed(2)
+			+ "<br>LLR: " + llr.toFixed(4);
         }
 
         function calculatePentanomialElo() {
@@ -381,14 +385,18 @@
 			var variance1 = LL_dev1 + LD_dev1 + WLDD_dev1 + WD_dev1 + WW_dev1;
 			var llr = 0.5 * total_pairs * Math.log(variance0 / variance1)
 
-            document.getElementById("PentanomialElo").innerHTML = "Points: " + (points * 2) + "/" + (total_pairs * 2) + " (" + score_in_percent.toFixed(2) + "%)" 
+            document.getElementById("PentanomialElo").innerHTML = 
+			"Points: " + (points * 2) + "/" + (total_pairs * 2) + " (" + score_in_percent.toFixed(2) + "%)" 
 			+ "<br>Elo: " + elo.toFixed(2) + " (" + elo_error_margin_lower.toFixed(2) + " / +" + elo_error_margin_upper.toFixed(2) + ")"
 			+ " [" + elo_lower_bound.toFixed(2) + " to " + elo_upper_bound.toFixed(2) + "]"
-			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " (" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")"
-			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]" + "<br>LOS: " + LOS.toFixed(2) + "%"
+			+ "<br>nElo: " + nelo.toFixed(2) + " (" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")"
+			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]" 
 			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " (" + gamepairs_elo_error_margin_lower.toFixed(2) + " / +" + gamepairs_elo_error_margin_upper.toFixed(2) + ")"
 			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + " to " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) + "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
+			+ "<br>LOS: " + LOS.toFixed(2) + "%"
+			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) 
+			+ "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) 
+			+ "<br>LLR: " + llr.toFixed(4);
         }
     </script>
 </body>
