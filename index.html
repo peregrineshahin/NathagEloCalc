@@ -160,6 +160,11 @@
 			return nelo * Math.sqrt(2) * std_deviation / (800 / Math.LN10) + 0.5;
 		}
 		
+		function score_to_bayeselo(score, drawelo) {
+			x = Math.pow(10, -drawelo / 400)
+			return score_to_elo(score)/(4 * x / Math.pow(1 + x, 2))
+		}
+		
 		function bayeselo_to_score(bayeselo, drawelo) {
 		    var pwin  = 1.0 / (1.0 + Math.pow(10.0, (-bayeselo + drawelo) / 400.0))
 			var ploss = 1.0 / (1.0 + Math.pow(10.0, (bayeselo + drawelo) / 400.0))
@@ -227,8 +232,11 @@
 			
 			var win_loss_ratio = wins / losses;
 			
-			var bayeselo = 200 * Math.log10(wins_ratio/losses_ratio * (1-losses_ratio)/(1-wins_ratio))
 			var drawelo = 200 * Math.log10((1-losses_ratio)/losses_ratio * (1-wins_ratio)/wins_ratio)
+			var bayeselo = score_to_bayeselo(score, drawelo)
+			var bayeselo_lower_bound = score_to_bayeselo(score_lower_bound, drawelo);
+			var bayeselo_upper_bound = score_to_bayeselo(score_upper_bound, drawelo);
+			var bayeselo_error_margin = (bayeselo_upper_bound - bayeselo_lower_bound) / 2;
 			
 			var elo0 = parseFloat(document.getElementById("elo0wdl").value)
 			var elo1 = parseFloat(document.getElementById("elo1wdl").value)
@@ -262,7 +270,9 @@
 			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" 
 			+ nelo_lower_bound.toFixed(2) + ", " + nelo_upper_bound.toFixed(2) + "]"
 			+ "<br>LOS: " + LOS.toFixed(2) + "%" + "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) + "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
+			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + " +/- " + bayeselo_error_margin.toFixed(2)
+			+ " [" + bayeselo_lower_bound.toFixed(2) + ", " + bayeselo_upper_bound.toFixed(2) + "]"
+			+ "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
         }
 
         function calculatePentanomialElo() {
