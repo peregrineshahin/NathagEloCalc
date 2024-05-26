@@ -236,7 +236,6 @@
 			var bayeselo = score_to_bayeselo(score, drawelo)
 			var bayeselo_lower_bound = score_to_bayeselo(score_lower_bound, drawelo);
 			var bayeselo_upper_bound = score_to_bayeselo(score_upper_bound, drawelo);
-			var bayeselo_error_margin = (bayeselo_upper_bound - bayeselo_lower_bound) / 2;
 			
 			var elo0 = parseFloat(document.getElementById("elo0wdl").value)
 			var elo1 = parseFloat(document.getElementById("elo1wdl").value)
@@ -270,7 +269,7 @@
 			+ "<br>Normalized Elo: " + nelo.toFixed(2) + " +/- " + nelo_error_margin.toFixed(2) + " [" 
 			+ nelo_lower_bound.toFixed(2) + ", " + nelo_upper_bound.toFixed(2) + "]"
 			+ "<br>LOS: " + LOS.toFixed(2) + "%" + "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) + "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) + " +/- " + bayeselo_error_margin.toFixed(2)
+			+ "<br>Bayes Elo: " + bayeselo.toFixed(2) +
 			+ " [" + bayeselo_lower_bound.toFixed(2) + ", " + bayeselo_upper_bound.toFixed(2) + "]"
 			+ "<br>Draw Elo: " + drawelo.toFixed(2) + "<br>LLR: " + llr.toFixed(4);
         }
