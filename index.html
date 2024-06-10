@@ -139,6 +139,39 @@
             <button onclick="calculatePentanomialElo()">Calculate Elo</button>
             <div id="PentanomialElo"></div>
         </div>
+		
+		<div class="input-group">
+            <h3>SPRT</h3>
+            <div>
+				<label for="Elo">Elo:</label>
+				<input id="Elo" type="number">
+				<label for="Variance">Variance:</label>
+				<input id="Variance" type="number">
+				<label for="elo0">elo0:</label>
+				<input id="elo0" type="number" value="0">
+				<label for="elo1">elo1:</label>
+				<input id="elo1" type="number" value="0">
+				<label for="alpha">alpha:</label>
+				<input id="alpha" type="number" value="0.05">
+				<label for="beta">beta:</label>
+				<input id="beta" type="number" value="0.05">
+				<br>
+				<label for="eloType">Model:</label>
+				<select id="eloType">
+                    <option value="nElo">normalized (nElo)</option>
+                    <option value="Elo">logistic (Elo)</option>
+                </select>
+				<select id="model">
+                    <option value="Pentanomial">Pentanomial</option>
+					<option value="WDL">WDL</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="calculateSPRT()">Calculate SPRT</button>
+            <div id="SPRT"></div>
+        </div>
     </div>
 
     <footer>
@@ -288,7 +321,8 @@
 			+ "<br>LOS: " + LOS.toFixed(2) + "%" 
 			+ "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) 
 			+ "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>LLR: " + llr.toFixed(4);
+			+ "<br>LLR: " + llr.toFixed(4)
+			+ "<br>Variance: " + variance.toFixed(4)
         }
 
         function calculatePentanomialElo() {
@@ -408,8 +442,60 @@
 			+ "<br>LOS: " + LOS.toFixed(2) + "%"
 			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) 
 			+ "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) 
-			+ "<br>LLR: " + llr.toFixed(4);
+			+ "<br>LLR: " + llr.toFixed(4)
+			+ "<br>Variance: " + variance.toFixed(4)
         }
+		
+		function calculateSPRT () {
+			var elo = parseFloat(document.getElementById("Elo").value);
+			var variance = parseFloat(document.getElementById("Variance").value);
+			var elo0 = parseFloat(document.getElementById("elo0").value);
+			var elo1 = parseFloat(document.getElementById("elo1").value);
+			var elotype = document.getElementById("eloType").value;
+			var model = document.getElementById("model").value;
+			var alpha = parseFloat(document.getElementById("alpha").value);
+			var beta = parseFloat(document.getElementById("beta").value);
+			var score = elo_to_score(elo);
+			var score0;
+			var score1;
+			
+			if (model == "Pentanomial") {
+				score0 = nelo_to_score_penta(elo0, Math.sqrt(variance))
+				score1 = nelo_to_score_penta(elo1, Math.sqrt(variance))
+			} else {
+				score0 = nelo_to_score_wdl(elo0, Math.sqrt(variance))
+				score1 = nelo_to_score_wdl(elo1, Math.sqrt(variance))
+			}
+			if (elotype == "Elo") {
+				score0 = elo_to_score(elo0)
+				score1 = elo_to_score(elo1)
+			}
+			
+			var w2 = Math.pow((score1 - score0), 2) / variance;
+			var LA = Math.log(beta / (1 - alpha));
+			var LB = Math.log((1 - beta) / alpha);
+			var h = (2.0 * score - (score0 + score1)) / (score1 - score0)
+			var pass_prob;
+			var expected_games;
+			if (Math.abs(h * (LA - LB)) < 0.000001) {
+				// avoid division by zero
+				pass_prob = -LA / (LB - LA);
+				expected_games = -LA * LB / w2;
+			} else {
+				var exp_a = Math.exp(-h * LA);
+				var exp_b = Math.exp(-h * LB);
+				pass_prob = (1-exp_a)/(exp_b-exp_a)
+				expected_games = (2/h)*(LB*pass_prob+LA*(1-pass_prob)) / w2
+			}
+				
+			if (model == "Pentanomial") {
+				expected_games = expected_games * 2
+			}
+			
+			document.getElementById("SPRT").innerHTML = 
+			"Pass Probability: " + (pass_prob*100).toFixed(2) + "%"
+			+ "<br>Expected # of games: " + (expected_games).toFixed(0)
+		}
     </script>
 </body>
 </html>
