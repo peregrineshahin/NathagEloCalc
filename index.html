@@ -404,6 +404,8 @@
 			var gamepairs_elo_error_margin_lower = gamepairs_elo - gamepairs_elo_lower_bound;
 			var gamepairs_elo_error_margin_upper = gamepairs_elo_upper_bound - gamepairs_elo;
 			
+			var normalized_pair_elo = -100 * Math.log10((2 * LL + LD) / (2 * WW + WD));
+			
 			var elo0 = parseFloat(document.getElementById("elo0penta").value)
 			var elo1 = parseFloat(document.getElementById("elo1penta").value)
 			var eloType = document.getElementById("eloTypePenta").value;
@@ -439,6 +441,7 @@
 			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]" 
 			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " (-" + gamepairs_elo_error_margin_lower.toFixed(2) + " / +" + gamepairs_elo_error_margin_upper.toFixed(2) + ")"
 			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + " to " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
+			+ "<br>Normalized Pair Elo: " + normalized_pair_elo.toFixed(2)
 			+ "<br>LOS: " + LOS.toFixed(2) + "%"
 			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) 
 			+ "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) 
