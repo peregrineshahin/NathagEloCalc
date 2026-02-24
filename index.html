@@ -1,504 +1,275 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Elo Difference Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-	    background-color: pink;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .input-group, .button-group {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .input-group h3, .button-group button {
-            margin-bottom: 5px;
-        }
-        .input-group input {
-            margin: 5px;
-            padding: 5px;
-            width: 60px;
-        }
-        .button-group button {
-            padding: 8px 15px;
-        }
-        #sum, #product {
-            margin-top: 20px;
-        }
-		/* For mobile devices */
-@media only screen and (max-width: 600px) {
-    .input-group input {
-        width: 10%; /* Set input width to 90% of container width */
-        max-width: 200px; /* Set max-width to prevent input from expanding too much */
-    }
-        footer {
-            position: relative;
-            bottom: 10px;
-            width: 100%;
-        }
-	}
-    </style>
-</head>
-<body>
-    <h1>Elo Difference Calculator</h1>
-    <div class="container">
-        <div class="input-group">
-            <h3>Win-Draw-Loss Model</h3>
-            <div>
-				<label for="losses">Losses:</label>
-				<input id="losses" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="draws">Draws:</label>
-				<input id="draws" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="wins">Wins:</label>
-                <input id="wins" type="number" min="0" oninput="validity.valid||(value='');">
-				<br>
-				<label for="elo0wdl">elo0:</label>
-				<input id="elo0wdl" type="number" value="0">
-				<label for="elo1wdl">elo1:</label>
-				<input id="elo1wdl" type="number" value="0">
-				<label for="eloTypeWDL">LLR:</label>
-				<select id="eloTypeWDL">
-                    <option value="nElo">nElo</option>
-                    <option value="Elo">Elo</option>
-                    <option value="BayesElo">BayesElo</option>
-                </select>
-				<label for="errormarginWDL">Margin:</label>
-				<select id="errormarginWDL">
-                    <option value="CI95">95% CI</option>
-					<option value="CI80">80% CI</option>
-                    <option value="CI85">85% CI</option>
-                    <option value="CI90">90% CI</option>
-                    <option value="CI99">99% CI</option>
-					<option value="sigma1">1-sigma</option>
-                    <option value="sigma2">2-sigma</option>
-                    <option value="sigma3">3-sigma</option>
-					<option value="sigma4">4-sigma</option>
-                    <option value="sigma5">5-sigma</option>
-                    <option value="sigma6">6-sigma</option>
-                </select>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>Elo Difference Calculator</h1>
+    </header>
+
+    <main class="container">
+      <section class="input-group">
+        <h3>Win–Draw–Loss Model</h3>
+        <form
+          onsubmit="
+            event.preventDefault();
+            calculateWDLElo();
+          "
+        >
+          <fieldset>
+            <legend>Results</legend>
+
+            <label>
+              Losses
+              <input id="losses" type="number" min="0" required />
+            </label>
+
+            <label>
+              Draws
+              <input id="draws" type="number" min="0" required />
+            </label>
+
+            <label>
+              Wins
+              <input id="wins" type="number" min="0" required />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Parameters</legend>
+
+            <label>
+              elo0
+              <input id="elo0wdl" type="number" value="0" required />
+            </label>
+
+            <label>
+              elo1
+              <input id="elo1wdl" type="number" value="0" required />
+            </label>
+
+            <label>
+              LLR
+              <select id="eloTypeWDL">
+                <option value="nElo">nElo</option>
+                <option value="Elo">Elo</option>
+                <option value="BayesElo">BayesElo</option>
+              </select>
+            </label>
+
+            <label>
+              Margin
+              <select id="errormarginWDL">
+                <option value="CI95">95% CI</option>
+                <option value="CI80">80% CI</option>
+                <option value="CI85">85% CI</option>
+                <option value="CI90">90% CI</option>
+                <option value="CI99">99% CI</option>
+                <option value="sigma1">1-sigma</option>
+                <option value="sigma2">2-sigma</option>
+                <option value="sigma3">3-sigma</option>
+                <option value="sigma4">4-sigma</option>
+                <option value="sigma5">5-sigma</option>
+                <option value="sigma6">6-sigma</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <button type="submit">Calculate Elo</button>
+          <output id="WDLElo"></output>
+        </form>
+      </section>
+
+      <section class="input-group">
+        <h3>Pentanomial Model</h3>
+        <form
+          onsubmit="
+            event.preventDefault();
+            calculatePentanomialElo();
+          "
+        >
+          <fieldset>
+            <label>
+              Input Format:
+              <select
+                id="pentaInputMode"
+                onchange="togglePentaInputMode()"
+                required
+              >
+                <option value="array">Array Input</option>
+                <option value="separate">Separate Inputs</option>
+              </select>
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Results</legend>
+
+            <div id="pentaSingleInputs" style="display: none">
+              <label>
+                LL
+                <input id="LL" type="number" min="0" />
+              </label>
+              <label>
+                LD
+                <input id="LD" type="number" min="0" />
+              </label>
+              <label>
+                DD / WL
+                <input id="WLDD" type="number" min="0" />
+              </label>
+              <label>
+                WD
+                <input id="WD" type="number" min="0" />
+              </label>
+              <label>
+                WW
+                <input id="WW" type="number" min="0" />
+              </label>
             </div>
-        </div>
 
-        <div class="button-group">
-            <button onclick="calculateWDLElo()">Calculate Elo</button>
-            <div id="WDLElo"></div>
-        </div>
+            <label id="pentaArrayLabel">
+              Array Input
+              <input
+                id="pentaArray"
+                type="text"
+                placeholder="[LL,LD,WLDD,WD,WW]"
+                required
+              />
+            </label>
+          </fieldset>
 
-        <div class="input-group">
-            <h3>Pentanomial Model</h3>
-            <div>
-				<label for="LL">LL:</label>
-				<input id="LL" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="LD">LD:</label>
-				<input id="LD" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="WLDD">DD/WL:</label>
-				<input id="WLDD" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="WD">WD:</label>
-				<input id="WD" type="number" min="0" oninput="validity.valid||(value='');">
-				<label for="WW">WW:</label>
-				<input id="WW" type="number" min="0" oninput="validity.valid||(value='');">
-				<br>
-				<label for="elo0penta">elo0:</label>
-				<input id="elo0penta" type="number" value="0">
-				<label for="elo1penta">elo1:</label>
-				<input id="elo1penta" type="number" value="0">
-				<label for="eloTypePenta">LLR:</label>
-				<select id="eloTypePenta">
-                    <option value="nElo">nElo</option>
-                    <option value="Elo">Elo</option>
-                </select>
-				<label for="errormarginPenta">Margin:</label>
-				<select id="errormarginPenta">
-                    <option value="CI95">95% CI</option>
-					<option value="CI80">80% CI</option>
-                    <option value="CI85">85% CI</option>
-                    <option value="CI90">90% CI</option>
-                    <option value="CI99">99% CI</option>
-					<option value="sigma1">1-sigma</option>
-                    <option value="sigma2">2-sigma</option>
-                    <option value="sigma3">3-sigma</option>
-					<option value="sigma4">4-sigma</option>
-                    <option value="sigma5">5-sigma</option>
-                    <option value="sigma6">6-sigma</option>
-                </select>
-            </div>
-        </div>
+          <fieldset>
+            <legend>Parameters</legend>
 
-        <div class="button-group">
-            <button onclick="calculatePentanomialElo()">Calculate Elo</button>
-            <div id="PentanomialElo"></div>
-        </div>
-		
-		<div class="input-group">
-            <h3>SPRT</h3>
-            <div>
-				<label for="Elo">Elo:</label>
-				<input id="Elo" type="number">
-				<label for="Variance">Variance:</label>
-				<input id="Variance" type="number">
-				<label for="elo0">elo0:</label>
-				<input id="elo0" type="number" value="0">
-				<label for="elo1">elo1:</label>
-				<input id="elo1" type="number" value="0">
-				<label for="alpha">alpha:</label>
-				<input id="alpha" type="number" value="0.05">
-				<label for="beta">beta:</label>
-				<input id="beta" type="number" value="0.05">
-				<br>
-				<label for="eloType">Model:</label>
-				<select id="eloType">
-                    <option value="nElo">normalized (nElo)</option>
-                    <option value="Elo">logistic (Elo)</option>
-                </select>
-				<select id="model">
-                    <option value="Pentanomial">Pentanomial</option>
-					<option value="WDL">WDL</option>
-                </select>
-            </div>
-        </div>
+            <label>
+              elo0
+              <input id="elo0penta" type="number" value="0" required />
+            </label>
 
-        <div class="button-group">
-            <button onclick="calculateSPRT()">Calculate SPRT</button>
-            <div id="SPRT"></div>
-        </div>
-    </div>
+            <label>
+              elo1
+              <input id="elo1penta" type="number" value="0" required />
+            </label>
+
+            <label>
+              LLR
+              <select id="eloTypePenta">
+                <option value="nElo">nElo</option>
+                <option value="Elo">Elo</option>
+              </select>
+            </label>
+
+            <label>
+              Margin
+              <select id="errormarginPenta">
+                <option value="CI95">95% CI</option>
+                <option value="CI80">80% CI</option>
+                <option value="CI85">85% CI</option>
+                <option value="CI90">90% CI</option>
+                <option value="CI99">99% CI</option>
+                <option value="sigma1">1-sigma</option>
+                <option value="sigma2">2-sigma</option>
+                <option value="sigma3">3-sigma</option>
+                <option value="sigma4">4-sigma</option>
+                <option value="sigma5">5-sigma</option>
+                <option value="sigma6">6-sigma</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <button type="submit">Calculate Elo</button>
+          <output id="PentanomialElo"></output>
+        </form>
+      </section>
+
+      <section class="input-group">
+        <h3>SPRT</h3>
+        <form
+          onsubmit="
+            event.preventDefault();
+            calculateSPRT();
+          "
+        >
+          <fieldset>
+            <legend>Inputs</legend>
+
+            <label>
+              Elo
+              <input id="Elo" type="number" required />
+            </label>
+
+            <label>
+              Variance
+              <input id="Variance" type="number" required />
+            </label>
+
+            <label>
+              elo0
+              <input id="elo0" type="number" value="0" required />
+            </label>
+
+            <label>
+              elo1
+              <input id="elo1" type="number" value="0" required />
+            </label>
+
+            <label>
+              alpha
+              <input id="alpha" type="number" value="0.05" required />
+            </label>
+
+            <label>
+              beta
+              <input id="beta" type="number" value="0.05" required />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <label>
+              Model
+              <select id="eloType">
+                <option value="nElo">normalized (nElo)</option>
+                <option value="Elo">logistic (Elo)</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <label>
+              Data
+              <select id="model">
+                <option value="Pentanomial">Pentanomial</option>
+                <option value="WDL">WDL</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <button type="submit">Calculate SPRT</button>
+          <output id="SPRT"></output>
+        </form>
+      </section>
+    </main>
 
     <footer>
-        <p><br><br>This page is used to calculate the elo difference and other match stats between two chess engines/players based on match results.<br>Written by justanothertester from Stockfish Discord.</p>
+      <p>
+        This page calculates Elo differences and match statistics between two
+        chess engines or players based on match results.<br />
+        Written by justanothertester from Stockfish Discord.
+      </p>
     </footer>
 
-    <script>
-		function score_to_elo(score) {
-			return -400 * Math.log(1 / score - 1) / Math.LN10;
-		}
-		
-		function elo_to_score(elo) {
-			return (1 / (1 + Math.pow(10, (-elo / 400))));
-		}
-		
-		function score_to_nelo_penta(score, std_deviation) {
-			return (score - 0.5) / (Math.sqrt(2) * std_deviation) * (800 / Math.LN10);
-		}
-		
-		function score_to_nelo_wdl(score, std_deviation) {
-			return (score - 0.5) / (std_deviation) * (800 / Math.LN10);
-		}
-		
-		function nelo_to_score_penta(nelo, std_deviation) {
-			return nelo * Math.sqrt(2) * std_deviation / (800 / Math.LN10) + 0.5;
-		}
-		
-		function score_to_bayeselo(score, drawelo) {
-			x = Math.pow(10, -drawelo / 400)
-			return score_to_elo(score)/(4 * x / Math.pow(1 + x, 2))
-		}
-		
-		function bayeselo_to_score(bayeselo, drawelo) {
-		    var pwin  = 1.0 / (1.0 + Math.pow(10.0, (-bayeselo + drawelo) / 400.0))
-			var ploss = 1.0 / (1.0 + Math.pow(10.0, (bayeselo + drawelo) / 400.0))
-			var pdraw = 1.0 - pwin - ploss
-			return pwin + 0.5 * pdraw + 0 * ploss;
-		}
-		
-		function nelo_to_score_wdl(nelo, std_deviation) {
-			return nelo * std_deviation / (800 / Math.LN10) + 0.5;
-		}
-		
-		function ncdf(x, mean, std) {
-			var x = (x - mean) / std;
-			var t = 1 / (1 + 0.2315419 * Math.abs(x));
-			var d = 0.3989423 * Math.exp( -x * x / 2);
-			var prob = d * t * (0.3193815 + t * ( -0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-			if( x > 0 ) {prob = 1 - prob};
-			return prob;
-		}
+    <div id="resultModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modalBody"></div>
+      </div>
+    </div>
 
-        function calculateWDLElo() {
-            var losses = parseFloat(document.getElementById("losses").value);
-            var draws = parseFloat(document.getElementById("draws").value);
-            var wins = parseFloat(document.getElementById("wins").value);
-			var total_games = losses + draws + wins;
-			var points = losses * 0 + draws * 0.5 + wins * 1;
-			var score = points / total_games;
-			var score_in_percent = score * 100;
-			
-			var losses_ratio = losses / total_games;
-			var draws_ratio = draws / total_games;
-			var wins_ratio = wins / total_games;
-			
-			var losses_dev = losses_ratio * Math.pow(0 - score, 2);
-			var draws_dev = draws_ratio * Math.pow(0.5 - score, 2);
-			var wins_dev = wins_ratio * Math.pow(1 - score, 2);
-			var variance = losses_dev + draws_dev + wins_dev;
-			var std_deviation = Math.sqrt(variance);
-			
-			var zscore;
-			var errormargin = document.getElementById("errormarginWDL").value;
-			if (errormargin == "CI95") {zscore = 1.959963984540054}
-			else if (errormargin == "CI80") {zscore = 1.2815515655446004}
-			else if (errormargin == "CI85") {zscore = 1.4395314709384557}
-			else if (errormargin == "CI90") {zscore = 1.6448536269514729}
-			else if (errormargin == "CI99") {zscore = 2.5758293035489004}
-			else if (errormargin == "sigma1") {zscore = 1}
-			else if (errormargin == "sigma2") {zscore = 2}
-			else if (errormargin == "sigma3") {zscore = 3}
-			else if (errormargin == "sigma4") {zscore = 4}
-			else if (errormargin == "sigma5") {zscore = 5}
-			else if (errormargin == "sigma6") {zscore = 6}
-			var score_lower_bound = score - zscore * std_deviation / Math.sqrt(total_games);
-			var score_upper_bound = score + zscore * std_deviation / Math.sqrt(total_games);
-			var score_error_margin = (score_upper_bound - score_lower_bound) / 2;
-			
-			var elo = score_to_elo(score);
-			var elo_lower_bound = score_to_elo(score_lower_bound);
-			var elo_upper_bound = score_to_elo(score_upper_bound);
-			var elo_error_margin_lower = elo - elo_lower_bound;
-			var elo_error_margin_upper = elo_upper_bound - elo;
-			
-			var nelo = score_to_nelo_wdl(score, std_deviation);
-			var nelo_lower_bound = score_to_nelo_wdl(score_lower_bound, std_deviation);
-			var nelo_upper_bound = score_to_nelo_wdl(score_upper_bound, std_deviation);
-			var nelo_error_margin_lower = nelo - nelo_lower_bound;
-			var nelo_error_margin_upper = nelo_upper_bound - nelo;
-			
-			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_games))))*100;
-			
-			var win_loss_ratio = wins / losses;
-			
-			var drawelo = 200 * Math.log10((1-losses_ratio)/losses_ratio * (1-wins_ratio)/wins_ratio)
-			var bayeselo = score_to_bayeselo(score, drawelo)
-			var bayeselo_lower_bound = score_to_bayeselo(score_lower_bound, drawelo);
-			var bayeselo_upper_bound = score_to_bayeselo(score_upper_bound, drawelo);
-			var bayeselo_error_margin_lower = bayeselo - bayeselo_lower_bound;
-			var bayeselo_error_margin_upper = bayeselo_upper_bound - bayeselo;
-			
-			var elo0 = parseFloat(document.getElementById("elo0wdl").value)
-			var elo1 = parseFloat(document.getElementById("elo1wdl").value)
-			var eloType = document.getElementById("eloTypeWDL").value;
-			var score0;
-			var score1;
-			if (eloType == "BayesElo") {
-				score0 = bayeselo_to_score(elo0, drawelo)
-				score1 = bayeselo_to_score(elo1, drawelo)
-			} else if (eloType == "Elo") {
-				score0 = elo_to_score(elo0)
-				score1 = elo_to_score(elo1)
-			} else {
-				score0 = nelo_to_score_wdl(elo0, std_deviation)
-				score1 = nelo_to_score_wdl(elo1, std_deviation)
-			}
-			
-			var losses_dev0 = losses_ratio * Math.pow(0 - score0, 2);
-			var draws_dev0 = draws_ratio * Math.pow(0.5 - score0, 2);
-			var wins_dev0 = wins_ratio * Math.pow(1 - score0, 2);
-			var variance0 = losses_dev0 + draws_dev0 + wins_dev0;
-			var losses_dev1 = losses_ratio * Math.pow(0 - score1, 2);
-			var draws_dev1 = draws_ratio * Math.pow(0.5 - score1, 2);
-			var wins_dev1 = wins_ratio * Math.pow(1 - score1, 2);
-			var variance1 = losses_dev1 + draws_dev1 + wins_dev1;
-			var llr = 0.5 * total_games * Math.log(variance0 / variance1)
-			
-            document.getElementById("WDLElo").innerHTML = 
-			"Points: " + points + "/" + total_games + " (" + score_in_percent.toFixed(2) + "%)"
-			+ "<br>Elo: " + elo.toFixed(2) + " (-" + elo_error_margin_lower.toFixed(2) + " / +" + elo_error_margin_upper.toFixed(2) + ")"
-			+ " [" + elo_lower_bound.toFixed(2) + " to " + elo_upper_bound.toFixed(2) + "]"
-			+ "<br>nElo: " + nelo.toFixed(2) + " (-" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")" 
-			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]"
-			+ "<br>BayesElo: " + bayeselo.toFixed(2) + " (-" + bayeselo_error_margin_lower.toFixed(2) + " / +" + bayeselo_error_margin_upper.toFixed(2) + ")"
-			+ " [" + bayeselo_lower_bound.toFixed(2) + " to " + bayeselo_upper_bound.toFixed(2) + "]"
-			+ "<br>DrawElo: " + drawelo.toFixed(2) 
-			+ "<br>LOS: " + LOS.toFixed(2) + "%" 
-			+ "<br>W/L Ratio: " + win_loss_ratio.toFixed(2) 
-			+ "<br>Draw Ratio: " + draws_ratio.toFixed(2)
-			+ "<br>LLR: " + llr.toFixed(4)
-			+ "<br>Variance: " + variance.toFixed(4)
-        }
-
-        function calculatePentanomialElo() {
-            var LL = parseFloat(document.getElementById("LL").value);
-            var LD = parseFloat(document.getElementById("LD").value);
-            var WLDD = parseFloat(document.getElementById("WLDD").value);
-            var WD = parseFloat(document.getElementById("WD").value);
-            var WW = parseFloat(document.getElementById("WW").value);
-			var total_pairs = LL + LD + WLDD + WD + WW;
-			var points = LL * 0 + LD * 0.25 + WLDD * 0.5 + WD * 0.75 + WW * 1;
-			var score = points / total_pairs;
-			var score_in_percent = score * 100;
-			
-			var LL_ratio = LL / total_pairs;
-			var LD_ratio = LD / total_pairs;
-			var WLDD_ratio = WLDD / total_pairs;
-			var WD_ratio = WD / total_pairs;
-			var WW_ratio = WW / total_pairs;
-			
-			var LL_dev = LL_ratio * Math.pow(0 - score, 2);
-			var LD_dev = LD_ratio * Math.pow(0.25 - score, 2);
-			var WLDD_dev = WLDD_ratio * Math.pow(0.5 - score, 2);
-			var WD_dev = WD_ratio * Math.pow(0.75 - score, 2);
-			var WW_dev = WW_ratio * Math.pow(1 - score, 2);
-			var variance = LL_dev + LD_dev + WLDD_dev + WD_dev + WW_dev;
-			var std_deviation = Math.sqrt(variance);
-			
-			var zscore;
-			var errormargin = document.getElementById("errormarginPenta").value;
-			if (errormargin == "CI95") {zscore = 1.959963984540054}
-			else if (errormargin == "CI80") {zscore = 1.2815515655446004}
-			else if (errormargin == "CI85") {zscore = 1.4395314709384557}
-			else if (errormargin == "CI90") {zscore = 1.6448536269514729}
-			else if (errormargin == "CI99") {zscore = 2.5758293035489004}
-			else if (errormargin == "sigma1") {zscore = 1}
-			else if (errormargin == "sigma2") {zscore = 2}
-			else if (errormargin == "sigma3") {zscore = 3}
-			else if (errormargin == "sigma4") {zscore = 4}
-			else if (errormargin == "sigma5") {zscore = 5}
-			else if (errormargin == "sigma6") {zscore = 6}
-			var score_lower_bound = score - zscore * std_deviation / Math.sqrt(total_pairs);
-			var score_upper_bound = score + zscore * std_deviation / Math.sqrt(total_pairs);
-			var score_error_margin = (score_upper_bound - score_lower_bound) / 2;
-			
-			var elo = score_to_elo(score);
-			var elo_lower_bound = score_to_elo(score_lower_bound);
-			var elo_upper_bound = score_to_elo(score_upper_bound);
-			var elo_error_margin_lower = elo - elo_lower_bound;
-			var elo_error_margin_upper = elo_upper_bound - elo;
-			
-			var nelo = score_to_nelo_penta(score, std_deviation);
-			var nelo_lower_bound = score_to_nelo_penta(score_lower_bound, std_deviation);
-			var nelo_upper_bound = score_to_nelo_penta(score_upper_bound, std_deviation);
-			var nelo_error_margin_lower = nelo - nelo_lower_bound;
-			var nelo_error_margin_upper = nelo_upper_bound - nelo;
-			
-			var LOS = (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_pairs))))*100;
-			
-			var pairs_ratio = (WW + WD) / (LL + LD);
-			
-			var gamepairs_L_score = (LL + LD) / total_pairs;
-			var gamepairs_D_score = (WLDD) / total_pairs;
-			var gamepairs_W_score = (WW + WD) / total_pairs;
-			var gamepairs_score = ((LL + LD) * 0 + WLDD * 0.5 + (WD + WW) * 1) / total_pairs;
-			
-			var gamepairs_L_dev = gamepairs_L_score * Math.pow(0 - gamepairs_score, 2);
-			var gamepairs_D_dev = gamepairs_D_score * Math.pow(0.5 - gamepairs_score, 2);
-			var gamepairs_W_dev = gamepairs_W_score * Math.pow(1 - gamepairs_score, 2);
-			var gamepairs_variance = gamepairs_L_dev + gamepairs_D_dev + gamepairs_W_dev;
-			var gamepairs_std_deviation = Math.sqrt(gamepairs_variance);
-			
-			var gamepairs_score_lower_bound = gamepairs_score - zscore * gamepairs_std_deviation / Math.sqrt(total_pairs);
-			var gamepairs_score_upper_bound = gamepairs_score + zscore * gamepairs_std_deviation / Math.sqrt(total_pairs);
-			var gamepairs_score_error_margin = (gamepairs_score_upper_bound - gamepairs_score_lower_bound) / 2;
-			
-			var gamepairs_elo = score_to_elo(gamepairs_score);
-			var gamepairs_elo_lower_bound = score_to_elo(gamepairs_score_lower_bound);
-			var gamepairs_elo_upper_bound = score_to_elo(gamepairs_score_upper_bound);
-			var gamepairs_elo_error_margin_lower = gamepairs_elo - gamepairs_elo_lower_bound;
-			var gamepairs_elo_error_margin_upper = gamepairs_elo_upper_bound - gamepairs_elo;
-			
-			var normalized_pair_elo = -100 * Math.log10((2 * LL + LD) / (2 * WW + WD));
-			
-			var elo0 = parseFloat(document.getElementById("elo0penta").value)
-			var elo1 = parseFloat(document.getElementById("elo1penta").value)
-			var eloType = document.getElementById("eloTypePenta").value;
-			var score0;
-			var score1;
-			if (eloType == "nElo") {
-				score0 = nelo_to_score_penta(elo0, std_deviation)
-				score1 = nelo_to_score_penta(elo1, std_deviation)
-			} else {
-				score0 = elo_to_score(elo0)
-				score1 = elo_to_score(elo1)
-			}
-			
-			var LL_dev0 = LL_ratio * Math.pow(0 - score0, 2);
-			var LD_dev0 = LD_ratio * Math.pow(0.25 - score0, 2);
-			var WLDD_dev0 = WLDD_ratio * Math.pow(0.5 - score0, 2);
-			var WD_dev0 = WD_ratio * Math.pow(0.75 - score0, 2);
-			var WW_dev0 = WW_ratio * Math.pow(1 - score0, 2);
-			var variance0 = LL_dev0 + LD_dev0 + WLDD_dev0 + WD_dev0 + WW_dev0;
-			var LL_dev1 = LL_ratio * Math.pow(0 - score1, 2);
-			var LD_dev1 = LD_ratio * Math.pow(0.25 - score1, 2);
-			var WLDD_dev1 = WLDD_ratio * Math.pow(0.5 - score1, 2);
-			var WD_dev1 = WD_ratio * Math.pow(0.75 - score1, 2);
-			var WW_dev1 = WW_ratio * Math.pow(1 - score1, 2);
-			var variance1 = LL_dev1 + LD_dev1 + WLDD_dev1 + WD_dev1 + WW_dev1;
-			var llr = 0.5 * total_pairs * Math.log(variance0 / variance1)
-
-            document.getElementById("PentanomialElo").innerHTML = 
-			"Points: " + (points * 2) + "/" + (total_pairs * 2) + " (" + score_in_percent.toFixed(2) + "%)" 
-			+ "<br>Elo: " + elo.toFixed(2) + " (-" + elo_error_margin_lower.toFixed(2) + " / +" + elo_error_margin_upper.toFixed(2) + ")"
-			+ " [" + elo_lower_bound.toFixed(2) + " to " + elo_upper_bound.toFixed(2) + "]"
-			+ "<br>nElo: " + nelo.toFixed(2) + " (-" + nelo_error_margin_lower.toFixed(2) + " / +" + nelo_error_margin_upper.toFixed(2) + ")"
-			+ " [" + nelo_lower_bound.toFixed(2) + " to " + nelo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Gamepairs Elo: " + gamepairs_elo.toFixed(2) + " (-" + gamepairs_elo_error_margin_lower.toFixed(2) + " / +" + gamepairs_elo_error_margin_upper.toFixed(2) + ")"
-			+ " [" + gamepairs_elo_lower_bound.toFixed(2) + " to " + gamepairs_elo_upper_bound.toFixed(2) + "]" 
-			+ "<br>Normalized Pair Elo: " + normalized_pair_elo.toFixed(2)
-			+ "<br>LOS: " + LOS.toFixed(2) + "%"
-			+ "<br>Pairs Ratio: " + pairs_ratio.toFixed(2) 
-			+ "<br>Draw Ratio: " + WLDD_ratio.toFixed(2) 
-			+ "<br>LLR: " + llr.toFixed(4)
-			+ "<br>Variance: " + variance.toFixed(4)
-        }
-		
-		function calculateSPRT () {
-			var elo = parseFloat(document.getElementById("Elo").value);
-			var variance = parseFloat(document.getElementById("Variance").value);
-			var elo0 = parseFloat(document.getElementById("elo0").value);
-			var elo1 = parseFloat(document.getElementById("elo1").value);
-			var elotype = document.getElementById("eloType").value;
-			var model = document.getElementById("model").value;
-			var alpha = parseFloat(document.getElementById("alpha").value);
-			var beta = parseFloat(document.getElementById("beta").value);
-			var score = elo_to_score(elo);
-			var score0;
-			var score1;
-			
-			if (model == "Pentanomial") {
-				score0 = nelo_to_score_penta(elo0, Math.sqrt(variance))
-				score1 = nelo_to_score_penta(elo1, Math.sqrt(variance))
-			} else {
-				score0 = nelo_to_score_wdl(elo0, Math.sqrt(variance))
-				score1 = nelo_to_score_wdl(elo1, Math.sqrt(variance))
-			}
-			if (elotype == "Elo") {
-				score0 = elo_to_score(elo0)
-				score1 = elo_to_score(elo1)
-			}
-			
-			var w2 = Math.pow((score1 - score0), 2) / variance;
-			var LA = Math.log(beta / (1 - alpha));
-			var LB = Math.log((1 - beta) / alpha);
-			var h = (2.0 * score - (score0 + score1)) / (score1 - score0)
-			var pass_prob;
-			var expected_games;
-			if (Math.abs(h * (LA - LB)) < 0.000001) {
-				// avoid division by zero
-				pass_prob = -LA / (LB - LA);
-				expected_games = -LA * LB / w2;
-			} else {
-				var exp_a = Math.exp(-h * LA);
-				var exp_b = Math.exp(-h * LB);
-				pass_prob = (1-exp_a)/(exp_b-exp_a)
-				expected_games = (2/h)*(LB*pass_prob+LA*(1-pass_prob)) / w2
-			}
-				
-			if (model == "Pentanomial") {
-				expected_games = expected_games * 2
-			}
-			
-			document.getElementById("SPRT").innerHTML = 
-			"Pass Probability: " + (pass_prob*100).toFixed(2) + "%"
-			+ "<br>Expected # of games: " + (expected_games).toFixed(0)
-		}
-    </script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
