@@ -224,16 +224,28 @@ function calculatePentanomialElo() {
 
   if (mode === "array") {
     const arrayInput = document.getElementById("pentaArray").value.trim();
-    try {
-      let cleanedInput = arrayInput.replace(/^\[|\]$/g, "");
-      counts = cleanedInput.split(",").map(Number);
+    // Strip an optional leading label such as "P:" before the array
+    let cleanedInput = arrayInput
+      .replace(/^.*:/, "")
+      .trim()
+      .replace(/^\[|\]$/g, "");
+    counts = cleanedInput.split(",").map(Number);
 
-      if (!Array.isArray(counts) || counts.length !== 5 || counts.some(isNaN)) {
-        throw "Invalid array length or values";
-      }
-    } catch {
+    let problem = null;
+    if (counts.length !== 5) {
+      problem = `expected 5 values, got ${counts.length}.`;
+    } else if (counts.some(isNaN)) {
+      problem = "all values must be numbers.";
+    }
+
+    if (problem) {
       alert(
-        "Invalid array input! Use format: [LL,LD,WLDD,WD,WW] or LL,LD,WLDD,WD,WW",
+        `Invalid pentanomial input: ${problem}\n\n` +
+          "Enter 5 counts in the order LL, LD, DD/WL, WD, WW, for example:\n" +
+          "  0, 8, 80, 20, 0\n" +
+          "  [0, 8, 80, 20, 0]\n" +
+          "  P: [0, 8, 80, 20, 0]\n" +
+          "  Ptnml(0-2): 0, 8, 80, 20, 0",
       );
       return;
     }
